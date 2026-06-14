@@ -25,5 +25,5 @@ build-backend = "hatchling.build"
 packages = ["rules", "server"]
 
 [tool.pytest.ini_options]
-testpaths = ["rules/tests", "eval"]
+testpaths = ["rules/tests", "server/tests"]
 addopts = "-q"

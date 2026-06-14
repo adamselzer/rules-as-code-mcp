@@ -1,0 +1,129 @@
+"""A real MCP client that drives the server over stdio and captures a transcript.
+
+This is the end-to-end proof: it launches the server as a subprocess (exactly as
+Claude Desktop or Claude Code would), once as an anonymous screener and once as an
+authenticated caseworker, calls the tools, and records what came back -- including
+the failure cases (a screener blocked from a determination, a bad determination id,
+an unsupported program). The transcript is written to clients/demo_transcript.md.
+
+Run:  python clients/demo_client.py
+"""
+
+from __future__ import annotations
+
+import asyncio
+import json
+import sys
+from pathlib import Path
+
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+REPO = Path(__file__).resolve().parent.parent
+TRANSCRIPT = Path(__file__).with_name("demo_transcript.md")
+
+SAMPLE_HOUSEHOLD = {
+    "members": [{"age": 34}, {"age": 31}, {"age": 6}],
+    "income": [{"kind": "earned", "monthly_amount": 2100}],
+    "shelter_cost_monthly": 950,
+    "utilities_monthly": 250,
+}
+
+log_lines: list[str] = []
+
+
+def emit(md: str) -> None:
+    log_lines.append(md)
+
+
+def _server_params(role: str) -> StdioServerParameters:
+    return StdioServerParameters(
+        command=sys.executable,
+        args=["-m", "server.main"],
+        cwd=str(REPO),
+        env={"RULES_MCP_ROLE": role, "PYTHONUNBUFFERED": "1"},
+    )
+
+
+def _render_result(result) -> tuple[bool, object]:
+    """Return (is_error, payload) from a CallToolResult."""
+    if result.structuredContent is not None and not result.isError:
+        return False, result.structuredContent
+    text = "".join(getattr(c, "text", "") for c in result.content)
+    try:
+        return result.isError, json.loads(text)
+    except json.JSONDecodeError:
+        return result.isError, text
+
+
+async def call(session: ClientSession, name: str, args: dict, note: str) -> object:
+    result = await session.call_tool(name, args)
+    is_error, payload = _render_result(result)
+    status = "ERROR" if is_error else "ok"
+    emit(f"#### `{name}` — {note}")
+    emit(f"*request*: `{json.dumps(args)}`")
+    emit(f"*result* ({status}):\n")
+    emit("```json")
+    emit(json.dumps(payload, indent=2)[:2000])
+    emit("```\n")
+    return payload
+
+
+async def run_role(role: str, header: str) -> dict:
+    emit(f"### {header} (`RULES_MCP_ROLE={role}`)\n")
+    out: dict = {}
+    async with stdio_client(_server_params(role)) as (read, write):
+        async with ClientSession(read, write) as session:
+            init = await session.initialize()
+            emit(f"Connected to **{init.serverInfo.name}**. Tools available:")
+            tools = await session.list_tools()
+            for t in tools.tools:
+                emit(f"- `{t.name}` — {t.title}")
+            emit("")
+
+            if role == "screening":
+                await call(session, "screen_programs", {"household": SAMPLE_HOUSEHOLD},
+                           "anonymous screen, allowed")
+                await call(session, "check_program_eligibility",
+                           {"program": "SNAP", "household": SAMPLE_HOUSEHOLD},
+                           "blocked: screening scope cannot run a determination")
+                await call(session, "lookup_policy",
+                           {"question": "How is self-employment income counted?"},
+                           "policy lookup stub")
+            else:
+                det = await call(session, "check_program_eligibility",
+                                 {"program": "SNAP", "household": SAMPLE_HOUSEHOLD},
+                                 "full determination with rule trace + citations")
+                out["determination_id"] = det.get("determination_id") if isinstance(det, dict) else None
+                await call(session, "list_required_verifications",
+                           {"program": "SNAP", "household": SAMPLE_HOUSEHOLD},
+                           "verifications derived from the facts present")
+                if out.get("determination_id"):
+                    await call(session, "explain_determination",
+                               {"determination_id": out["determination_id"]},
+                               "plain trace of the stored determination")
+                await call(session, "explain_determination",
+                           {"determination_id": "snap-does-not-exist"},
+                           "failure case: unknown determination id")
+                await call(session, "check_program_eligibility",
+                           {"program": "TANF", "household": SAMPLE_HOUSEHOLD},
+                           "failure case: unsupported program")
+                await call(session, "check_program_eligibility",
+                           {"program": "SNAP", "household": {"members": []}},
+                           "failure case: malformed household")
+    emit("")
+    return out
+
+
+async def main() -> None:
+    emit("# Captured MCP client transcript\n")
+    emit("Generated by `clients/demo_client.py` driving `server/main.py` over stdio. "
+         "Both roles are the same server launched with a different `RULES_MCP_ROLE`.\n")
+    await run_role("screening", "Role 1 — anonymous screener")
+    await run_role("caseworker", "Role 2 — authenticated caseworker")
+    TRANSCRIPT.write_text("\n".join(log_lines))
+    print(f"Wrote transcript to {TRANSCRIPT}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
