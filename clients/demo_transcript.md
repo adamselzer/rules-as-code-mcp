@@ -118,10 +118,10 @@ Connected to **rules-as-code-mcp**. Tools available:
       "passed": null,
       "citation": {
         "authority": "Michigan BEM",
-        "section": "556",
-        "title": "Michigan broad-based categorical eligibility: gross income limit raised to 200% of poverty and the asset test waived for most households.",
-        "url": "https://dhhs.michigan.gov/OLMWEB/EX/BP/Public/BEM/556.pdf",
-        "label": "Michigan BEM 556"
+        "section": "213",
+        "title": "FAP categorical eligibility: broad-based categorical eligibility raises the gross income limit to 200% of poverty and waives the asset test for most food assistance groups.",
+        "url": "https://dhhs.michigan.gov/OLMWEB/EX/BP/Public/BEM/213.pdf",
+        "label": "Michigan BEM 213"
       }
     },
     {
@@ -138,7 +138,7 @@ Connected to **rules-as-code-mcp**. Tools available:
         "authority": "7 CFR",
         "section": "273.9(a)(1)",
         "title": "Gross income eligibility standard: monthly gross income at or below 130% of the federal poverty guidelines.",
-        "url": "https://www.ecfr.gov/current/titl
+        "url":
 ```
 
 #### `list_required_verifications` — verifications derived from the facts present
@@ -202,8 +202,8 @@ Connected to **rules-as-code-mcp**. Tools available:
       },
       "result": "asset_test=waived",
       "passed": null,
-      "citation": "Michigan BEM 556",
-      "citation_url": "https://dhhs.michigan.gov/OLMWEB/EX/BP/Public/BEM/556.pdf"
+      "citation": "Michigan BEM 213",
+      "citation_url": "https://dhhs.michigan.gov/OLMWEB/EX/BP/Public/BEM/213.pdf"
     },
     {
       "rule": "snap.gross_income_test",

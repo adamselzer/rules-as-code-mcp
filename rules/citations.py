@@ -101,9 +101,9 @@ CITATIONS: dict[str, Citation] = {
     ),
     "snap.bbce": Citation(
         authority="Michigan BEM",
-        section="556",
-        title="Michigan broad-based categorical eligibility: gross income limit raised to 200% of poverty and the asset test waived for most households.",
-        url="https://dhhs.michigan.gov/OLMWEB/EX/BP/Public/BEM/556.pdf",
+        section="213",
+        title="FAP categorical eligibility: broad-based categorical eligibility raises the gross income limit to 200% of poverty and waives the asset test for most food assistance groups.",
+        url="https://dhhs.michigan.gov/OLMWEB/EX/BP/Public/BEM/213.pdf",
     ),
     "snap.asset_test": Citation(
         authority="7 CFR",

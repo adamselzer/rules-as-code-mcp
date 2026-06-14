@@ -192,4 +192,4 @@ Each repo also runs standalone.
 - SNAP: [7 CFR 273.9](https://www.ecfr.gov/current/title-7/part-273/section-273.9),
   [USDA FNS FY2026 COLA](https://www.fns.usda.gov/snap/allotment/COLA),
   [CBPP SNAP eligibility guide](https://www.cbpp.org/research/food-assistance/a-quick-guide-to-snap-eligibility-and-benefits),
-  Michigan [BEM 556](https://dhhs.michigan.gov/OLMWEB/EX/BP/Public/BEM/556.pdf).
+  Michigan [BEM 213](https://dhhs.michigan.gov/OLMWEB/EX/BP/Public/BEM/213.pdf) (FAP categorical eligibility).
