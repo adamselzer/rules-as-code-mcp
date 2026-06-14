@@ -1,0 +1,132 @@
+{
+  "_about": "Labeled SNAP eligibility cases, hand-derived under FY2026 figures (48 states + DC, Michigan BBCE on). Each case's expected decision, the rules that must fire, the citations that must appear, and (where noted) the expected net income were computed by hand from 7 CFR 273.9 and the FY2026 standards, independently of the implementation. run_eval.py checks the core against these.",
+  "ruleset": "snap-mi-fy2026.1",
+  "cases": [
+    {
+      "id": "single-zero-income",
+      "category": "eligible",
+      "description": "Single adult, no income. Net income 0, well under the $1305 limit.",
+      "household": {"members": [{"age": 30}]},
+      "expected": {"decision": "eligible", "net_income": 0, "must_fire": ["snap.net_income_test"], "must_cite": ["7 CFR 273.9(a)(2)"]}
+    },
+    {
+      "id": "single-low-earned",
+      "category": "eligible",
+      "description": "Single adult earning $800. 20% earned deduction ($160) + standard ($209) -> net $431.",
+      "household": {"members": [{"age": 30}], "income": [{"kind": "earned", "monthly_amount": 800}]},
+      "expected": {"decision": "eligible", "net_income": 431, "must_fire": ["snap.earned_income_deduction", "snap.standard_deduction", "snap.gross_income_test", "snap.net_income_test"]}
+    },
+    {
+      "id": "single-high-earned-gross-fail",
+      "category": "ineligible",
+      "description": "Single adult earning $9000. Gross exceeds the 200% BBCE gross limit ($2609); fails the gross test.",
+      "household": {"members": [{"age": 30}], "income": [{"kind": "earned", "monthly_amount": 9000}]},
+      "expected": {"decision": "ineligible", "must_fire": ["snap.gross_income_test"]}
+    },
+    {
+      "id": "single-unearned-net-fail",
+      "category": "ineligible",
+      "description": "Single adult, $1600 unearned. No earned deduction; net $1391 exceeds the $1305 net limit.",
+      "household": {"members": [{"age": 30}], "income": [{"kind": "unearned", "monthly_amount": 1600}]},
+      "expected": {"decision": "ineligible", "net_income": 1391, "must_fire": ["snap.net_income_test"]}
+    },
+    {
+      "id": "single-unearned-just-eligible",
+      "category": "near_threshold",
+      "description": "Single adult, $1500 unearned. Net $1291 is just under the $1305 limit.",
+      "household": {"members": [{"age": 30}], "income": [{"kind": "unearned", "monthly_amount": 1500}]},
+      "expected": {"decision": "eligible", "net_income": 1291}
+    },
+    {
+      "id": "single-net-exactly-at-limit",
+      "category": "near_threshold",
+      "description": "Single adult, unearned $1514. Net = $1514 - $209 = $1305, exactly the limit; at-or-below is eligible.",
+      "household": {"members": [{"age": 30}], "income": [{"kind": "unearned", "monthly_amount": 1514}]},
+      "expected": {"decision": "eligible", "net_income": 1305}
+    },
+    {
+      "id": "single-net-one-dollar-over",
+      "category": "near_threshold",
+      "description": "Single adult, unearned $1515. Net $1306 is one dollar over the limit.",
+      "household": {"members": [{"age": 30}], "income": [{"kind": "unearned", "monthly_amount": 1515}]},
+      "expected": {"decision": "ineligible", "net_income": 1306}
+    },
+    {
+      "id": "family3-earned-with-shelter",
+      "category": "eligible",
+      "description": "Family of 3, earned $2000, rent $900 + utilities $200. Net $987 (shelter deduction $404.50, uncapped).",
+      "household": {"members": [{"age": 35}, {"age": 33}, {"age": 5}], "income": [{"kind": "earned", "monthly_amount": 2000}], "shelter_cost_monthly": 900, "utilities_monthly": 200},
+      "expected": {"decision": "eligible", "net_income": 987, "must_fire": ["snap.excess_shelter_deduction"]}
+    },
+    {
+      "id": "family4-mid-income-eligible",
+      "category": "eligible",
+      "description": "Family of 4, earned $3000, rent $1000 + utilities $300. Net $1966.",
+      "household": {"members": [{"age": 40}, {"age": 38}, {"age": 10}, {"age": 7}], "income": [{"kind": "earned", "monthly_amount": 3000}], "shelter_cost_monthly": 1000, "utilities_monthly": 300},
+      "expected": {"decision": "eligible", "net_income": 1966}
+    },
+    {
+      "id": "family4-high-income-net-fail",
+      "category": "ineligible",
+      "description": "Family of 4, earned $5000, rent $1000 + utilities $300. Shelter excess negative (no deduction); net $3777 over the $2680 limit.",
+      "household": {"members": [{"age": 40}, {"age": 38}, {"age": 10}, {"age": 7}], "income": [{"kind": "earned", "monthly_amount": 5000}], "shelter_cost_monthly": 1000, "utilities_monthly": 300},
+      "expected": {"decision": "ineligible", "net_income": 3777, "must_fire": ["snap.net_income_test"]}
+    },
+    {
+      "id": "elderly-low-income-eligible",
+      "category": "elderly",
+      "description": "Elderly single (age 67), $1000 unearned. Gross test exempt; net $791.",
+      "household": {"members": [{"age": 67}], "income": [{"kind": "unearned", "monthly_amount": 1000}]},
+      "expected": {"decision": "eligible", "net_income": 791, "must_fire": ["snap.elderly_disabled_gross_exemption"]}
+    },
+    {
+      "id": "elderly-uncapped-shelter-and-medical",
+      "category": "elderly",
+      "description": "Elderly single, $1000 unearned, rent $2000 + utilities $300, medical $200. Medical deduction $165, shelter deduction uncapped ($1987); net floors at 0.",
+      "household": {"members": [{"age": 70}], "income": [{"kind": "unearned", "monthly_amount": 1000}], "shelter_cost_monthly": 2000, "utilities_monthly": 300, "medical_expenses_monthly": 200},
+      "expected": {"decision": "eligible", "net_income": 0, "must_fire": ["snap.medical_deduction", "snap.excess_shelter_deduction", "snap.elderly_disabled_gross_exemption"]}
+    },
+    {
+      "id": "nonelderly-shelter-capped",
+      "category": "eligible",
+      "description": "Non-elderly single, earned $1000, rent $2000 + utilities $300. Shelter deduction capped at $744; net floors at 0.",
+      "household": {"members": [{"age": 30}], "income": [{"kind": "earned", "monthly_amount": 1000}], "shelter_cost_monthly": 2000, "utilities_monthly": 300},
+      "expected": {"decision": "eligible", "net_income": 0}
+    },
+    {
+      "id": "disabled-high-income-net-fail",
+      "category": "elderly",
+      "description": "Disabled adult + child, earned $4500. Gross exempt, but net $3391 exceeds the size-2 net limit $1763. Exemption does not guarantee eligibility.",
+      "household": {"members": [{"age": 40, "disabled": true}, {"age": 10}], "income": [{"kind": "earned", "monthly_amount": 4500}]},
+      "expected": {"decision": "ineligible", "net_income": 3391, "must_fire": ["snap.elderly_disabled_gross_exemption", "snap.net_income_test"]}
+    },
+    {
+      "id": "family3-dependent-care-and-child-support",
+      "category": "eligible",
+      "description": "Parent + 2 kids, earned $2500, rent $1000 + utilities $200, dependent care $400, child support paid $300. Net $437.",
+      "household": {"members": [{"age": 35}, {"age": 8}, {"age": 4}], "income": [{"kind": "earned", "monthly_amount": 2500}], "shelter_cost_monthly": 1000, "utilities_monthly": 200, "dependent_care_monthly": 400, "child_support_paid_monthly": 300},
+      "expected": {"decision": "eligible", "net_income": 437, "must_fire": ["snap.dependent_care_deduction", "snap.child_support_deduction"]}
+    },
+    {
+      "id": "family2-earned-eligible",
+      "category": "eligible",
+      "description": "Family of 2, earned $2500, rent $800 + utilities $250. Net $1637.",
+      "household": {"members": [{"age": 30}, {"age": 6}], "income": [{"kind": "earned", "monthly_amount": 2500}], "shelter_cost_monthly": 800, "utilities_monthly": 250},
+      "expected": {"decision": "eligible", "net_income": 1637}
+    },
+    {
+      "id": "family5-earned-eligible",
+      "category": "eligible",
+      "description": "Family of 5, earned $4000, rent $1200 + utilities $400. Net $2809.",
+      "household": {"members": [{"age": 38}, {"age": 36}, {"age": 12}, {"age": 9}, {"age": 4}], "income": [{"kind": "earned", "monthly_amount": 4000}], "shelter_cost_monthly": 1200, "utilities_monthly": 400},
+      "expected": {"decision": "eligible", "net_income": 2809}
+    },
+    {
+      "id": "single-bbce-asset-waived",
+      "category": "eligible",
+      "description": "Single adult with $10,000 in resources but low income. Under BBCE the asset test is waived, so high assets do not disqualify.",
+      "household": {"members": [{"age": 30}], "income": [{"kind": "earned", "monthly_amount": 600}], "countable_resources": 10000},
+      "expected": {"decision": "eligible", "must_fire": ["snap.bbce"]}
+    }
+  ]
+}
