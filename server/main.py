@@ -20,6 +20,7 @@ Run:
 
 from __future__ import annotations
 
+import utils.session
 import sys
 
 from mcp.server.fastmcp import Context, FastMCP
