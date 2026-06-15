@@ -79,8 +79,8 @@ Two harnesses, both runnable as CI gates.
   result: 9/9 return a clean, correctly-typed, recoverable structured error. None
   crash; none leak an unauthorized result.
 
-The metrics are chosen to match the stake. Decision accuracy is table stakes;
-rule-trace and citation correctness are what make a determination defensible; and
+The metrics are chosen to match the stake. Decision accuracy is the baseline.
+Rule-trace and citation correctness are what make a determination defensible, and
 the robustness suite is the safety case for putting a model on the other end of
 these tools.
 
