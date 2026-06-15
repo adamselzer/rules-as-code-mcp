@@ -13,7 +13,7 @@ cd ~/code/rules-as-code-mcp
 git log --oneline      # four commits, logical stages
 ```
 
-## Option A — with the GitHub CLI (recommended)
+## Option A: with the GitHub CLI (recommended)
 
 ```bash
 # one-time, if needed:
@@ -27,7 +27,7 @@ gh repo create rules-as-code-mcp --public --source=. --remote=origin --push
 
 That creates the repo under your account and pushes `main` in one step.
 
-## Option B — without the CLI
+## Option B: without the CLI
 
 1. Create an empty repo named `rules-as-code-mcp` at https://github.com/new
    (no README, license, or .gitignore, since this repo already has them).

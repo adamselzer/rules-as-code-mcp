@@ -16,8 +16,8 @@ decision to.
 
 ## What it does
 
-A household's facts go in. A determination comes out, and it is never a bare
-yes/no. Every determination carries:
+A household's facts go in. A determination comes out with its reasoning attached.
+Every determination carries:
 
 - the **decision** (eligible / ineligible),
 - the **rule trace**: each rule that fired, what it saw, and what it concluded,
@@ -126,7 +126,7 @@ screening exist at all.
 
 ## Evaluation
 
-Evaluation is the deliverable, not the demo. Two harnesses, both runnable as CI
+Evaluation is the deliverable here. Two harnesses, both runnable as CI
 gates with `--check`.
 
 **Determination correctness** ([`eval/run_eval.py`](eval/run_eval.py), 18 hand-derived
